@@ -1,0 +1,44 @@
+# works.log — 작업 내역
+
+## 형식 (AI 에이전트 및 사용자 모두 준수)
+
+```
+[YYYY-MM-DD] @github_id | 작업 요약 (1~2줄)
+  - 변경 파일: 파일1, 파일2, ...
+  - 세부 내용: 무엇을 왜 했는지
+```
+
+---
+
+## 기록 규칙
+
+- `@github_id`: GitHub 아이디 또는 이름 (AI 에이전트는 사용 중인 도구명 기재, 예: `@claude`, `@cursor`, `@gemini`)
+- 날짜: `YYYY-MM-DD` 형식 (한국 시간 KST 기준)
+- 작업 요약: 한 줄로 무엇을 했는지 명확하게 기재
+- 변경 파일: 실제로 생성·수정·삭제한 파일만 나열
+- 세부 내용: 생략 가능하나, 구조적 변경·설계 결정 시 필수
+
+---
+
+## 작업 내역
+
+[2026-06-23] @youngbin0417 + @claude | 프로젝트 초기 구축
+  - 변경 파일: 전체 (27개 파일 신규 생성)
+  - 세부 내용: PLG 스택(Prometheus + Loki + Grafana) 모니터링 인스턴스 초기 구축.
+    Terraform(VPC/SG/EC2), Docker Compose(EC2 프로덕션), PLG 설정, 배포 스크립트, 문서 포함.
+    서비스 인스턴스 연동은 의도적 미구현 — prometheus.yml 타겟 주석 처리 상태 유지.
+
+[2026-06-23] @youngbin0417 + @claude | Grafana 대시보드 UI 개선
+  - 변경 파일: grafana/dashboards/node-exporter-full.json
+  - 세부 내용: 이모지 제거, 고정 색상 팔레트 적용, 상단 요약 패널 4→6개,
+    범례 테이블 형식, gradientMode none, 기본 시간범위 1h→3h. 버전 v2.
+
+[2026-06-23] @youngbin0417 + @claude | 로컬 테스트 환경 구성
+  - 변경 파일: docker-compose.local.yml, scripts/test-grafana.ps1, scripts/test-grafana.sh, docs/local-testing.md
+  - 세부 내용: Windows/macOS 로컬에서 Grafana 단독 또는 PLG 풀스택 테스트 가능하도록 구성.
+    PowerShell 한글 인코딩(UTF-8) 강제 설정 추가.
+
+[2026-06-23] @youngbin0417 + @claude | AI 에이전트 하네스 추가
+  - 변경 파일: AGENTS.md, CLAUDE.md
+  - 세부 내용: 범용 AI 에이전트 작업 규칙(AGENTS.md) 및 Claude 전용 지침(CLAUDE.md) 작성.
+    금지 사항, 파일 구조 규칙, 코드 스타일, works.log 기록 의무 정의.
