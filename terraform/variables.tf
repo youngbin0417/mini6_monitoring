@@ -6,7 +6,7 @@
 variable "aws_region" {
   description = "AWS 리전"
   type        = string
-  default     = "ap-northeast-2"
+  default     = "us-east-1"
 }
 
 variable "environment" {
@@ -18,7 +18,7 @@ variable "environment" {
 variable "project_name" {
   description = "프로젝트 이름 (리소스 네이밍에 사용)"
   type        = string
-  default     = "mini6-monitoring"
+  default     = "aivle05-monitoring"
 }
 
 # ---- VPC 설정 ----
@@ -37,7 +37,7 @@ variable "public_subnet_cidrs" {
 variable "availability_zones" {
   description = "사용할 가용 영역"
   type        = list(string)
-  default     = ["ap-northeast-2a", "ap-northeast-2c"]
+  default     = ["us-east-1a", "us-east-1c"]
 }
 
 # ---- EC2 모니터링 인스턴스 설정 ----

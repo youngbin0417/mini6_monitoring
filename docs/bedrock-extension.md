@@ -44,7 +44,7 @@ AWS Lambda 함수가 Bedrock 서비스를 호출할 수 있도록 IAM 역할에 
         "bedrock:InvokeModel",
         "bedrock:InvokeModelWithResponseStream"
       ],
-      "Resource": "arn:aws:bedrock:ap-northeast-2::foundation-model/anthropic.claude-3-*"
+      "Resource": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-*"
     }
   ]
 }
@@ -63,7 +63,7 @@ import os
 import urllib3
 import boto3
 
-bedrock = boto3.client(service_name='bedrock-runtime', region_name='ap-northeast-2')
+bedrock = boto3.client(service_name='bedrock-runtime', region_name='us-east-1')
 http = urllib3.PoolManager()
 
 LOKI_URL = os.environ.get('LOKI_URL') # 예: http://<loki-private-ip>:3100

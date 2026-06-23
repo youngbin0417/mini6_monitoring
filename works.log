@@ -46,3 +46,11 @@
 [2026-06-23] @youngbin0417 + @gemini | 서비스 인스턴스 연동 및 AWS Bedrock 확장 가이드 문서 작성
   - 변경 파일: docs/service-integration.md, docs/bedrock-extension.md, docs/architecture.md
   - 세부 내용: 실제 인스턴스를 연동하는 단계별 상세 절차(에러/로그 수집 포트 및 에이전트 설치)와 Loki API 및 AWS Bedrock Claude API를 Lambda와 연동하여 AI 장애 보고서를 발송하도록 하는 확장 가이드를 신규 작성함. 아키텍처 문서의 확장 포인트 섹션에 해당 문서들의 링크를 추가함.
+
+[2026-06-23] @youngbin0417 + @gemini | 서비스 및 모니터링 명칭 통일화 및 설정 업데이트
+  - 변경 파일: terraform/variables.tf, terraform/terraform.tfvars.example, prometheus/prometheus.yml, docs/service-integration.md
+  - 세부 내용: 서비스 및 모니터링 시스템 확정에 따라 모니터링 프로젝트명을 `aivle05-monitoring`으로 변경하고, 수집 대상 서비스명을 `aivle05-book-frontend` 및 `aivle05-book-backend`로 통일하여 설정 예시와 연동 문서를 수정함.
+
+[2026-06-23] @youngbin0417 + @gemini | AWS 기본 리전을 us-east-1으로 변경
+  - 변경 파일: terraform/variables.tf, terraform/terraform.tfvars.example, docs/bedrock-extension.md, docs/architecture.md
+  - 세부 내용: AWS 배포 리전을 `ap-northeast-2`에서 `us-east-1`로 기본값을 변경하고, 가용 영역을 `us-east-1a`/`us-east-1c`로 재조정함. 아키텍처 문서의 VPC 및 Bedrock 확장 문서의 람다 클라이언트 리전 설정도 us-east-1로 동기화함.

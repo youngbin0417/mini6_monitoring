@@ -71,16 +71,25 @@
 모니터링 인스턴스의 Prometheus가 새로 추가된 서비스 인스턴스를 수집하도록 등록합니다.
 
 1. 모니터링 인스턴스의 [prometheus.yml](file:///c:/Users/User/Desktop/Project/mini6_monitoring/prometheus/prometheus.yml) 파일을 수정합니다.
-2. `scrape_configs` 섹션에 신규 서비스 노드를 등록합니다.
+2. `scrape_configs` 섹션 하단에 신규 서비스 노드를 등록합니다.
    ```yaml
-     # 📦 서비스 인스턴스 Node Exporter 추가
-     - job_name: 'service-nodes'
-       static_configs:
-         - targets:
-             - '<서비스-인스턴스-사설-IP>:9100'
-           labels:
-             role: 'service'
-             instance: 'prod-service-01'  # Grafana에서 식별할 이름
+   # 1) 프론트엔드 서비스 (aivle05-book-frontend)
+   - job_name: 'aivle05-book-frontend'
+     static_configs:
+       - targets:
+           - '<프론트엔드-인스턴스-IP>:9100'
+         labels:
+           role: 'frontend'
+           instance: 'aivle05-book-frontend'
+
+   # 2) 백엔드 서비스 (aivle05-book-backend)
+   - job_name: 'aivle05-book-backend'
+     static_configs:
+       - targets:
+           - '<백엔드-인스턴스-IP>:9100'
+         labels:
+           role: 'backend'
+           instance: 'aivle05-book-backend'
    ```
 3. Prometheus 컨테이너를 재시작하지 않고 설정을 반영하기 위해 **API Reload**를 수행합니다.
    ```bash

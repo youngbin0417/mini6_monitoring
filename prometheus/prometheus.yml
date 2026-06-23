@@ -8,7 +8,7 @@ global:
   scrape_timeout: 10s        # 수집 타임아웃
 
   external_labels:
-    monitor: 'mini6-monitoring'
+    monitor: 'aivle05-monitoring'
     environment: 'prod'
 
 # ---- 알람 규칙 파일 ----
@@ -50,18 +50,18 @@ scrape_configs:
   # ============================================================
   # 📦 서비스 인스턴스 Node Exporter (추후 추가)
   # ============================================================
-  # 방법 1: 정적 타겟 직접 추가
-  # - job_name: 'service-nodes'
+  # # 1) 프론트엔드 서비스 (aivle05-book-frontend)
+  # - job_name: 'aivle05-book-frontend'
   #   static_configs:
   #     - targets:
-  #         - '<서비스-인스턴스-A-IP>:9100'
-  #         - '<서비스-인스턴스-B-IP>:9100'
+  #         - '<프론트엔드-인스턴스-IP>:9100'
   #       labels:
-  #         role: 'service'
+  #         role: 'frontend'
   #
-  # 방법 2: file_sd_configs로 동적 타겟 관리
-  # - job_name: 'service-nodes'
-  #   file_sd_configs:
-  #     - files:
-  #         - '/etc/prometheus/targets/*.json'
-  #       refresh_interval: 30s
+  # # 2) 백엔드 서비스 (aivle05-book-backend)
+  # - job_name: 'aivle05-book-backend'
+  #   static_configs:
+  #     - targets:
+  #         - '<백엔드-인스턴스-IP>:9100'
+  #       labels:
+  #         role: 'backend'
