@@ -54,3 +54,7 @@
 [2026-06-23] @youngbin0417 + @gemini | AWS 기본 리전을 us-east-1으로 변경
   - 변경 파일: terraform/variables.tf, terraform/terraform.tfvars.example, docs/bedrock-extension.md, docs/architecture.md
   - 세부 내용: AWS 배포 리전을 `ap-northeast-2`에서 `us-east-1`로 기본값을 변경하고, 가용 영역을 `us-east-1a`/`us-east-1c`로 재조정함. 아키텍처 문서의 VPC 및 Bedrock 확장 문서의 람다 클라이언트 리전 설정도 us-east-1로 동기화함.
+
+[2026-06-23] @youngbin0417 + @gemini | 로컬 개발 환경 구성 가이드 보강
+  - 변경 파일: README.md
+  - 세부 내용: 로컬 Windows/Mac/Linux 환경에서 AWS CLI와 Terraform을 설치하고 임시/일반 자격 증명을 연동하는 구체적인 설정 가이드를 README.md의 사전 요구사항 섹션에 보강함.

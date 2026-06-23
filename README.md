@@ -39,11 +39,43 @@ AWS EC2 기반 인프라 모니터링 시스템. Docker Compose로 PLG 스택을
 
 인프라를 AWS에 배포하기 전에 로컬 환경(Docker Desktop)에서 Grafana 대시보드 테마와 레이아웃을 확인하려면 **[로컬 Grafana 시각화 테스트 가이드](docs/local-testing.md)**를 참고하세요.
 
-### 사전 요구사항
+### 📋 사전 요구사항 (로컬 PC 환경 설정)
 
-- AWS CLI 설정 완료 (`aws configure`)
-- Terraform >= 1.5
-- Git
+로컬 PC에서 Terraform을 실행하여 AWS 인프라를 구축하려면 아래 도구들이 설치되어 있어야 합니다.
+
+#### 1. AWS CLI 및 Terraform 설치
+
+- **Windows (PowerShell 관리자 권한)**
+
+  ```powershell
+  # AWS CLI 및 Terraform 한 번에 설치
+  winget install Amazon.AWSCLI
+  winget install HashiCorp.Terraform
+  ```
+
+  _(설치 후 터미널 창을 완전히 닫았다가 다시 열어야 명령어가 정상 인식됩니다)_
+
+- **macOS (Homebrew 사용)**
+  ```bash
+  brew install awscli
+  brew tap hashicorp/tap
+  brew install hashicorp/tap/terraform
+  ```
+
+#### 2. AWS 인증(Credentials) 설정
+
+로컬 PC에서 AWS 자원을 생성하려면 터미널에 인증 자격 증명이 주입되어야 합니다.
+
+- **일반 계정 (액세스 키 직접 사용 시)**
+  ```bash
+  aws configure
+  # 1. AWS Access Key ID 입력
+  # 2. AWS Secret Access Key 입력
+  # 3. Default region name: us-east-1 입력
+  # 4. Default output format: json 입력
+  ```
+- **Git 설치**
+  - 로컬 및 서버 소스 코드 관리를 위해 [Git](https://git-scm.com/)이 설치되어 있어야 합니다.
 
 ### 1단계: 인프라 프로비저닝
 
