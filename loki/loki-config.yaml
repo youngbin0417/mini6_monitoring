@@ -55,7 +55,6 @@ query_range:
 ingester:
   chunk_idle_period: 30m
   chunk_retain_period: 1m
-  max_transfer_retries: 0
   lifecycler:
     ring:
       kvstore:

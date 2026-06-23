@@ -58,3 +58,11 @@
 [2026-06-23] @youngbin0417 + @gemini | 로컬 개발 환경 구성 가이드 보강
   - 변경 파일: README.md
   - 세부 내용: 로컬 Windows/Mac/Linux 환경에서 AWS CLI와 Terraform을 설치하고 임시/일반 자격 증명을 연동하는 구체적인 설정 가이드를 README.md의 사전 요구사항 섹션에 보강함.
+
+[2026-06-23] @youngbin0417 + @gemini | Loki 3.1.0 미지원 설정 필드 제거
+  - 변경 파일: loki/loki-config.yaml
+  - 세부 내용: Loki 3.x 버전에서 구문 분석 오류를 유발하는 `ingester.max_transfer_retries` 필드를 설정 파일에서 삭제하여 Loki 컨테이너 기동 오류를 수정함.
+
+[2026-06-23] @youngbin0417 + @gemini | 백엔드 서비스 모니터링 타겟 연동 및 보안 그룹 설정
+  - 변경 파일: prometheus/prometheus.yml, terraform/terraform.tfvars
+  - 세부 내용: 백엔드 인스턴스 `aivle05-book-backend` (사설 IP `172.31.21.34`)의 메트릭 수집을 위해 Prometheus 설정을 반영하고, 로컬 및 외부 에이전트로부터 로그를 받기 위해 `service_instance_cidrs`에 `172.31.0.0/16` 및 `0.0.0.0/0`을 추가함.
