@@ -42,3 +42,7 @@
   - 변경 파일: AGENTS.md, CLAUDE.md
   - 세부 내용: 범용 AI 에이전트 작업 규칙(AGENTS.md) 및 Claude 전용 지침(CLAUDE.md) 작성.
     금지 사항, 파일 구조 규칙, 코드 스타일, works.log 기록 의무 정의.
+
+[2026-06-23] @youngbin0417 + @gemini | 서비스 인스턴스 연동 및 AWS Bedrock 확장 가이드 문서 작성
+  - 변경 파일: docs/service-integration.md, docs/bedrock-extension.md, docs/architecture.md
+  - 세부 내용: 실제 인스턴스를 연동하는 단계별 상세 절차(에러/로그 수집 포트 및 에이전트 설치)와 Loki API 및 AWS Bedrock Claude API를 Lambda와 연동하여 AI 장애 보고서를 발송하도록 하는 확장 가이드를 신규 작성함. 아키텍처 문서의 확장 포인트 섹션에 해당 문서들의 링크를 추가함.

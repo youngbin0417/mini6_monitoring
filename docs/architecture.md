@@ -66,6 +66,7 @@ PLG 스택(Prometheus + Loki + Grafana)을 EC2 인스턴스에 Docker Compose로
 
 ### 서비스 인스턴스 추가 시
 
+실제 서비스가 동작하는 인스턴스들을 모니터링 시스템과 연동하기 위한 상세 절차는 [서비스 인스턴스 연동 가이드](file:///c:/Users/User/Desktop/Project/mini6_monitoring/docs/service-integration.md)를 참고하세요.
 1. `terraform/ec2_services.tf` 파일 생성 (별도 분리)
 2. `prometheus/prometheus.yml`에 Node Exporter 타겟 추가
 3. 서비스 인스턴스에서 `scripts/install-agents.sh` 실행
@@ -73,13 +74,15 @@ PLG 스택(Prometheus + Loki + Grafana)을 EC2 인스턴스에 Docker Compose로
 
 ### Alertmanager 연동 시
 
+경고 메시지를 Slack이나 이메일 등으로 받아보기 위한 Alertmanager 연동 아키텍처입니다.
 1. `docker-compose.yml`에 Alertmanager 서비스 추가
 2. `prometheus.yml`에 alerting 섹션 추가
 3. Alertmanager 설정 파일 (Slack/Email 수신자 설정)
 
 ### Bedrock AI 연동 시
 
+Loki 로그를 AI가 자동 분석하고 트러블슈팅 가이드를 제시하도록 구성하는 상세 절차는 [AWS Bedrock AI 로그 분석 확장 가이드](file:///c:/Users/User/Desktop/Project/mini6_monitoring/docs/bedrock-extension.md)를 참고하세요.
 1. Lambda 함수 또는 API 서버 구현
 2. Loki API로 로그 데이터 조회
 3. Bedrock Claude 모델에 분석 요청
-4. Grafana 패널에 결과 표시
+4. Grafana 패널 또는 Slack 채널에 결과 표시
