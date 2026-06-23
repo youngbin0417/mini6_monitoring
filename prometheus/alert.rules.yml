@@ -1,0 +1,96 @@
+# ============================================================
+# Prometheus 알람 규칙
+# ============================================================
+
+groups:
+  # ---- 인스턴스 기본 알람 ----
+  - name: instance_alerts
+    rules:
+      # 인스턴스 다운 감지
+      - alert: InstanceDown
+        expr: up == 0
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "인스턴스 다운: {{ $labels.instance }}"
+          description: "{{ $labels.instance }} (job: {{ $labels.job }})이 3분 이상 응답하지 않습니다."
+
+  # ---- 리소스 사용률 알람 ----
+  - name: resource_alerts
+    rules:
+      # CPU 사용률 80% 초과
+      - alert: HighCpuUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "높은 CPU 사용률: {{ $labels.instance }}"
+          description: "{{ $labels.instance }}의 CPU 사용률이 {{ $value | printf \"%.1f\" }}%입니다. (5분 이상 80% 초과)"
+
+      # 메모리 사용률 85% 초과
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "높은 메모리 사용률: {{ $labels.instance }}"
+          description: "{{ $labels.instance }}의 메모리 사용률이 {{ $value | printf \"%.1f\" }}%입니다."
+
+      # 디스크 사용률 85% 초과
+      - alert: HighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "높은 디스크 사용률: {{ $labels.instance }}"
+          description: "{{ $labels.instance }}의 {{ $labels.mountpoint }} 디스크 사용률이 {{ $value | printf \"%.1f\" }}%입니다."
+
+      # 디스크 사용률 95% 초과 (긴급)
+      - alert: CriticalDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 95
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "🚨 디스크 거의 가득 참: {{ $labels.instance }}"
+          description: "{{ $labels.instance }}의 {{ $labels.mountpoint }} 디스크 사용률이 {{ $value | printf \"%.1f\" }}%입니다. 즉시 조치가 필요합니다."
+
+  # ---- 네트워크 알람 ----
+  - name: network_alerts
+    rules:
+      # 높은 네트워크 수신 트래픽 (100MB/s 초과)
+      - alert: HighNetworkReceive
+        expr: rate(node_network_receive_bytes_total{device!~"lo|docker.*|br-.*|veth.*"}[5m]) > 100 * 1024 * 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "높은 네트워크 수신 트래픽: {{ $labels.instance }}"
+          description: "{{ $labels.instance }}의 {{ $labels.device }} 인터페이스 수신량이 {{ $value | humanize1024 }}B/s입니다."
+
+  # ---- PLG 스택 자체 모니터링 ----
+  - name: plg_stack_alerts
+    rules:
+      # Prometheus TSDB 에러
+      - alert: PrometheusTargetScrapeFailure
+        expr: increase(prometheus_target_scrapes_exceeded_sample_limit_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus 스크래핑 샘플 제한 초과"
+          description: "일부 타겟에서 샘플 제한을 초과했습니다."
+
+      # Loki 에러율 증가
+      - alert: LokiRequestErrors
+        expr: rate(loki_request_duration_seconds_count{status_code=~"5.."}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Loki 5xx 에러 발생"
+          description: "Loki에서 5xx 에러가 증가하고 있습니다."

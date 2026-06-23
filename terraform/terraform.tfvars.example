@@ -1,0 +1,37 @@
+# ============================================================
+# Terraform 변수 값 템플릿
+# ============================================================
+# 이 파일을 terraform.tfvars로 복사 후 실제 값을 입력하세요:
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# ⚠️ terraform.tfvars는 .gitignore에 포함되어 있어 커밋되지 않습니다.
+# ============================================================
+
+# ---- AWS 기본 설정 ----
+aws_region   = "ap-northeast-2"
+environment  = "prod"
+project_name = "mini6-monitoring"
+
+# ---- EC2 설정 ----
+monitoring_instance_type = "t3.medium"
+# monitoring_ami_id      = ""          # 비워두면 최신 Amazon Linux 2023 자동 선택
+
+# ---- Key Pair 설정 ----
+# 옵션 1: 새 키 자동 생성 (기본값)
+create_key_pair = true
+# key_pair_name = ""
+
+# 옵션 2: 기존 키 사용
+# create_key_pair = false
+# key_pair_name   = "my-existing-key"
+
+# ---- 볼륨 크기 ----
+monitoring_root_volume_size = 20
+monitoring_data_volume_size = 50
+
+# ---- 접근 제어 (프로덕션에서는 반드시 특정 IP로 제한!) ----
+allowed_ssh_cidrs     = ["0.0.0.0/0"]    # 예: ["203.0.113.0/24"]
+allowed_grafana_cidrs = ["0.0.0.0/0"]    # 예: ["10.0.0.0/8", "203.0.113.0/24"]
+
+# ---- 서비스 인스턴스 CIDR (추후 사용) ----
+service_instance_cidrs = ["10.0.0.0/16"]

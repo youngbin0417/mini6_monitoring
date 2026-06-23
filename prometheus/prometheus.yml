@@ -1,0 +1,67 @@
+# ============================================================
+# Prometheus 메인 설정
+# ============================================================
+
+global:
+  scrape_interval: 15s       # 기본 메트릭 수집 간격
+  evaluation_interval: 15s   # 알람 규칙 평가 간격
+  scrape_timeout: 10s        # 수집 타임아웃
+
+  external_labels:
+    monitor: 'mini6-monitoring'
+    environment: 'prod'
+
+# ---- 알람 규칙 파일 ----
+rule_files:
+  - "alert.rules.yml"
+
+# ---- 수집 대상 설정 ----
+scrape_configs:
+
+  # 1) Prometheus 자체 모니터링
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          instance: 'monitoring-server'
+
+  # 2) 모니터링 인스턴스의 Node Exporter (자체 서버 메트릭)
+  - job_name: 'monitoring-node'
+    static_configs:
+      - targets: ['host.docker.internal:9100']
+        labels:
+          instance: 'monitoring-server'
+          role: 'monitoring'
+
+  # 3) Loki 메트릭 (Loki 자체 상태 모니터링)
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']
+        labels:
+          instance: 'loki'
+
+  # 4) Grafana 메트릭
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          instance: 'grafana'
+
+  # ============================================================
+  # 📦 서비스 인스턴스 Node Exporter (추후 추가)
+  # ============================================================
+  # 방법 1: 정적 타겟 직접 추가
+  # - job_name: 'service-nodes'
+  #   static_configs:
+  #     - targets:
+  #         - '<서비스-인스턴스-A-IP>:9100'
+  #         - '<서비스-인스턴스-B-IP>:9100'
+  #       labels:
+  #         role: 'service'
+  #
+  # 방법 2: file_sd_configs로 동적 타겟 관리
+  # - job_name: 'service-nodes'
+  #   file_sd_configs:
+  #     - files:
+  #         - '/etc/prometheus/targets/*.json'
+  #       refresh_interval: 30s

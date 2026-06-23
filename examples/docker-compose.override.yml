@@ -1,0 +1,41 @@
+# ============================================================
+# Docker Compose Override (개발/테스트 환경용)
+# ============================================================
+# 로컬 개발 환경에서 사용하는 오버라이드 설정입니다.
+# 사용법: docker compose -f docker-compose.yml -f examples/docker-compose.override.yml up -d
+# ============================================================
+
+services:
+  prometheus:
+    ports:
+      - "9090:9090"
+    # 리소스 제한 (로컬 환경)
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  loki:
+    ports:
+      - "3100:3100"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  grafana:
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true          # 개발용 익명 접근 허용
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_LOG_LEVEL=debug                       # 디버그 로그
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'

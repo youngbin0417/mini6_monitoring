@@ -1,0 +1,78 @@
+# ============================================================
+# Loki 설정 파일
+# ============================================================
+
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+  log_level: info
+
+common:
+  path_prefix: /var/loki
+  storage:
+    filesystem:
+      chunks_directory: /var/loki/chunks
+      rules_directory: /var/loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+# ---- 스키마 설정 ----
+schema_config:
+  configs:
+    - from: "2024-01-01"
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+# ---- 보관 및 제한 설정 ----
+limits_config:
+  retention_period: 168h                  # 7일 보관
+  max_query_series: 500
+  max_query_parallelism: 2
+  ingestion_rate_mb: 10                   # 초당 최대 10MB 수집
+  ingestion_burst_size_mb: 20             # 버스트 시 최대 20MB
+  per_stream_rate_limit: 3MB              # 스트림당 제한
+  per_stream_rate_limit_burst: 15MB
+
+# ---- 쿼리 성능 ----
+query_range:
+  align_queries_with_step: true
+  cache_results: true
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 100
+
+# ---- Ingester 설정 ----
+ingester:
+  chunk_idle_period: 30m
+  chunk_retain_period: 1m
+  max_transfer_retries: 0
+  lifecycler:
+    ring:
+      kvstore:
+        store: inmemory
+      replication_factor: 1
+    final_sleep: 0s
+  wal:
+    dir: /var/loki/wal
+
+# ---- Compactor (보관 기간 적용) ----
+compactor:
+  working_directory: /var/loki/compactor
+  compaction_interval: 10m
+  retention_enabled: true
+  retention_delete_delay: 2h
+  delete_request_store: filesystem
+
+# ---- 분석 비활성화 ----
+analytics:
+  reporting_enabled: false

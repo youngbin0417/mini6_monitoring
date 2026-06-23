@@ -1,0 +1,29 @@
+# ============================================================
+# Grafana 데이터 소스 자동 프로비저닝
+# ============================================================
+# Grafana 시작 시 자동으로 데이터 소스를 등록합니다.
+
+apiVersion: 1
+
+datasources:
+  # ---- Prometheus (기본 데이터 소스) ----
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: "15s"         # Prometheus scrape_interval과 동일
+      httpMethod: POST            # 긴 쿼리 지원
+      exemplarTraceIdDestinations: []
+
+  # ---- Loki ----
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    editable: true
+    jsonData:
+      maxLines: 1000              # 쿼리당 최대 로그 라인 수
+      derivedFields: []           # 추후 트레이싱 연동 시 사용

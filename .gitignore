@@ -1,0 +1,53 @@
+# ========================
+# 환경 변수 및 민감 파일
+# ========================
+.env
+*.pem
+*.key
+*.crt
+
+# ========================
+# Terraform
+# ========================
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
+terraform/*.auto.tfvars
+terraform/crash.log
+terraform/override.tf
+terraform/override.tf.json
+terraform/*_override.tf
+terraform/*_override.tf.json
+
+# ========================
+# Docker & 데이터 볼륨
+# ========================
+prometheus_data/
+loki_data/
+grafana_data/
+
+# ========================
+# OS & IDE
+# ========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ========================
+# 백업 파일
+# ========================
+backups/
+*.tar.gz
+*.zip
+
+# ========================
+# 로그
+# ========================
+*.log
+logs/

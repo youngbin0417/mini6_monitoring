@@ -1,0 +1,65 @@
+# ============================================================
+# Promtail 설정 예제 (서비스 인스턴스용)
+# ============================================================
+# 이 파일은 참고용 예제입니다.
+# install-agents.sh 스크립트가 자동으로 생성합니다.
+#
+# 수동 설치 시: 이 파일을 /etc/promtail/config.yml로 복사 후
+# <모니터링-서버-IP>를 실제 IP로 변경하세요.
+# ============================================================
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /var/lib/promtail/positions.yaml
+
+clients:
+  - url: http://<모니터링-서버-IP>:3100/loki/api/v1/push
+    batchwait: 1s
+    batchsize: 1048576
+
+scrape_configs:
+  # ---- 시스템 로그 ----
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: system
+          host: <호스트명>
+          __path__: /var/log/*.log
+
+  # ---- systemd journal ----
+  - job_name: journal
+    journal:
+      max_age: 12h
+      labels:
+        job: journal
+        host: <호스트명>
+    relabel_configs:
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'unit'
+
+  # ---- 애플리케이션 로그 (경로를 실제 앱에 맞게 수정) ----
+  - job_name: application
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: application
+          host: <호스트명>
+          __path__: /var/log/application/*.log
+
+  # ---- Docker 컨테이너 로그 (선택) ----
+  # - job_name: docker
+  #   static_configs:
+  #     - targets:
+  #         - localhost
+  #       labels:
+  #         job: docker
+  #         host: <호스트명>
+  #         __path__: /var/lib/docker/containers/**/*.log
+  #   pipeline_stages:
+  #     - docker: {}
