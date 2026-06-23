@@ -35,7 +35,12 @@ AWS EC2 기반 인프라 모니터링 시스템. Docker Compose로 PLG 스택을
 
 ## ⚡ 빠른 시작
 
+### 💻 로컬 시각화 테스트 (배포 전 검증)
+
+인프라를 AWS에 배포하기 전에 로컬 환경(Docker Desktop)에서 Grafana 대시보드 테마와 레이아웃을 확인하려면 **[로컬 Grafana 시각화 테스트 가이드](docs/local-testing.md)**를 참고하세요.
+
 ### 사전 요구사항
+
 - AWS CLI 설정 완료 (`aws configure`)
 - Terraform >= 1.5
 - Git
@@ -121,16 +126,16 @@ PW:  (.env에 설정한 비밀번호)
 
 ## 🔧 주요 명령어
 
-| 작업 | 명령어 |
-|:---|:---|
-| PLG 스택 시작 | `docker compose up -d` |
-| PLG 스택 중지 | `docker compose down` |
-| 로그 확인 | `docker compose logs -f` |
-| Prometheus 리로드 | `./scripts/deploy.sh --reload` |
-| 전체 재시작 | `./scripts/deploy.sh --restart` |
-| 헬스 체크 | `./scripts/health-check.sh` |
-| 백업 | `./scripts/backup.sh` |
-| S3 백업 | `./scripts/backup.sh --s3 <bucket>` |
+| 작업              | 명령어                              |
+| :---------------- | :---------------------------------- |
+| PLG 스택 시작     | `docker compose up -d`              |
+| PLG 스택 중지     | `docker compose down`               |
+| 로그 확인         | `docker compose logs -f`            |
+| Prometheus 리로드 | `./scripts/deploy.sh --reload`      |
+| 전체 재시작       | `./scripts/deploy.sh --restart`     |
+| 헬스 체크         | `./scripts/health-check.sh`         |
+| 백업              | `./scripts/backup.sh`               |
+| S3 백업           | `./scripts/backup.sh --s3 <bucket>` |
 
 ## 🔒 보안 체크리스트
 
@@ -141,11 +146,11 @@ PW:  (.env에 설정한 비밀번호)
 
 ## 📊 데이터 보관
 
-| 서비스 | 보관 기간 | 설정 위치 |
-|:---|:---|:---|
-| Prometheus | 30일 | `docker-compose.yml` (`--storage.tsdb.retention.time`) |
-| Loki | 7일 | `loki/loki-config.yaml` (`retention_period`) |
-| Grafana | 영구 | EBS 볼륨 |
+| 서비스     | 보관 기간 | 설정 위치                                              |
+| :--------- | :-------- | :----------------------------------------------------- |
+| Prometheus | 30일      | `docker-compose.yml` (`--storage.tsdb.retention.time`) |
+| Loki       | 7일       | `loki/loki-config.yaml` (`retention_period`)           |
+| Grafana    | 영구      | EBS 볼륨                                               |
 
 ## 🚧 향후 확장
 
