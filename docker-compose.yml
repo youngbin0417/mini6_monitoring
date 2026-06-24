@@ -94,6 +94,28 @@ services:
       retries: 3
       start_period: 60s
 
+  # ---- YACE: CloudWatch Exporter (ALB/ASG 메트릭) ----
+  yace:
+    image: ghcr.io/nerdswords/yet-another-cloudwatch-exporter:v0.61.2
+    container_name: yace
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./cloudwatch/yace-config.yml:/tmp/config.yml:ro
+    command:
+      - '--config.file=/tmp/config.yml'
+      - '--listen-address=:5000'
+      - '--scraping-interval=60'
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
 networks:
   monitoring:
     driver: bridge

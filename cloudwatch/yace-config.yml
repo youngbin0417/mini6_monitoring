@@ -1,0 +1,91 @@
+# ============================================================
+# YACE (Yet Another CloudWatch Exporter) 설정
+# ALB, ASG, EC2 관련 AWS CloudWatch 메트릭 수집
+# ============================================================
+# ⚠️ 사전 요구: 모니터링 EC2에 아래 IAM 권한 필요
+#   - cloudwatch:ListMetrics
+#   - cloudwatch:GetMetricData
+#   - tag:GetResources
+# ============================================================
+
+apiVersion: v1alpha1
+
+discovery:
+  jobs:
+    # ---- ALB (Application Load Balancer) 메트릭 ----
+    - type: AWS/ApplicationELB
+      regions:
+        - us-east-1
+      period: 60          # 60초 단위 집계
+      length: 300         # 최근 5분간 데이터 조회
+      metrics:
+        # 요청 수
+        - name: RequestCount
+          statistics: [Sum]
+        # 타겟 응답 시간 (초 단위)
+        - name: TargetResponseTime
+          statistics: [Average, p99]
+        # HTTP 2xx 성공 응답 수
+        - name: HTTPCode_Target_2XX_Count
+          statistics: [Sum]
+        # HTTP 4xx 클라이언트 에러 수
+        - name: HTTPCode_Target_4XX_Count
+          statistics: [Sum]
+        # HTTP 5xx 서버 에러 수
+        - name: HTTPCode_Target_5XX_Count
+          statistics: [Sum]
+        # ALB 자체 5xx 에러 수
+        - name: HTTPCode_ELB_5XX_Count
+          statistics: [Sum]
+        # 활성 연결 수
+        - name: ActiveConnectionCount
+          statistics: [Sum]
+        # 정상 호스트 수
+        - name: HealthyHostCount
+          statistics: [Average]
+        # 비정상 호스트 수
+        - name: UnHealthyHostCount
+          statistics: [Average]
+
+    # ---- ASG (Auto Scaling Group) 메트릭 ----
+    - type: AWS/AutoScaling
+      regions:
+        - us-east-1
+      period: 60
+      length: 300
+      metrics:
+        # 그룹 내 총 인스턴스 수
+        - name: GroupTotalInstances
+          statistics: [Average]
+        # 서비스 중인 인스턴스 수
+        - name: GroupInServiceInstances
+          statistics: [Average]
+        # 대기 중인 인스턴스 수
+        - name: GroupPendingInstances
+          statistics: [Average]
+        # 종료 중인 인스턴스 수
+        - name: GroupTerminatingInstances
+          statistics: [Average]
+        # 희망 용량
+        - name: GroupDesiredCapacity
+          statistics: [Average]
+
+    # ---- EC2 인스턴스 메트릭 (CloudWatch 기본) ----
+    - type: AWS/EC2
+      regions:
+        - us-east-1
+      period: 300
+      length: 600
+      metrics:
+        # CPU 사용률
+        - name: CPUUtilization
+          statistics: [Average, Maximum]
+        # 네트워크 인바운드 (바이트)
+        - name: NetworkIn
+          statistics: [Sum]
+        # 네트워크 아웃바운드 (바이트)
+        - name: NetworkOut
+          statistics: [Sum]
+        # 상태 체크 실패 횟수
+        - name: StatusCheckFailed
+          statistics: [Sum]

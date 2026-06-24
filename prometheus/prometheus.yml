@@ -46,21 +46,73 @@ scrape_configs:
         labels:
           instance: "grafana"
 
+  # 5) CloudWatch Exporter (ALB/ASG 메트릭)
+  - job_name: "cloudwatch"
+    static_configs:
+      - targets: ["yace:5000"]
+        labels:
+          instance: "cloudwatch-exporter"
+    scrape_interval: 60s # CloudWatch API 호출 빈도 제한을 위해 60초 간격
+
   # ============================================================
-  # 📦 서비스 인스턴스 Node Exporter (추후 추가)
+  # 📦 서비스 인스턴스 Node Exporter
   # ============================================================
-  # # 1) 프론트엔드 서비스 (aivle05-book-frontend)
-  # - job_name: 'aivle05-book-frontend'
-  #   static_configs:
-  #     - targets:
-  #         - '<프론트엔드-인스턴스-IP>:9100'
-  #       labels:
-  #         role: 'frontend'
-  #
-  # 1) 백엔드 서비스 (aivle05-book-backend)
+  # ---- EC2 Auto Discovery (ASG/동적 인스턴스 자동 탐색) ----
+  # Prometheus가 AWS EC2 API를 통해 실행 중인 인스턴스를 자동 감지
+  # ⚠️ 사전 요구: 모니터링 EC2에 ec2:DescribeInstances IAM 권한 필요
+  - job_name: 'aivle05-service-discovery'
+    ec2_sd_configs:
+      - region: 'us-east-1'
+        port: 9100
+        filters:
+          - name: 'instance-state-name'
+            values: ['running']
+
+    relabel_configs:
+      # 1) Project=aivle05 태그가 붙은 인스턴스만 수집
+      - source_labels: [__meta_ec2_tag_Project]
+        regex: 'aivle05'
+        action: keep
+
+      # 2) Role 태그를 role 라벨로 매핑 (backend, frontend 등)
+      - source_labels: [__meta_ec2_tag_Role]
+        target_label: role
+
+      # 3) Color 태그를 color 라벨로 매핑 (Blue/Green 배포 구분)
+      - source_labels: [__meta_ec2_tag_Color]
+        target_label: color
+
+      # 4) Name 태그를 서버 이름으로 매핑
+      - source_labels: [__meta_ec2_tag_Name]
+        target_label: server_name
+
+      # 5) EC2 인스턴스 ID를 instance_id 라벨로 매핑
+      - source_labels: [__meta_ec2_instance_id]
+        target_label: instance_id
+
+      # 6) EC2 사설 IP를 instance 라벨로 매핑 (기본 __address__ 대신 읽기 쉽게)
+      - source_labels: [__meta_ec2_private_ip]
+        regex: '(.+)'
+        replacement: '${1}:9100'
+        target_label: __address__
+
+      # 7) 사설 IP를 별도 라벨로도 보관
+      - source_labels: [__meta_ec2_private_ip]
+        target_label: private_ip
+
+  # ---- 정적 백엔드 타겟 (VPC 피어링, ASG 미사용 인스턴스용 폴백) ----
+  # ASG 미적용 서버는 아래에 직접 IP를 추가
   - job_name: 'aivle05-book-backend'
     static_configs:
       - targets:
           - '172.31.21.34:9100'
         labels:
           role: 'backend'
+
+  # # 프론트엔드 서비스 (추후 추가)
+  # - job_name: 'aivle05-book-frontend'
+  #   static_configs:
+  #     - targets:
+  #         - '<프론트엔드-인스턴스-IP>:9100'
+  #       labels:
+  #         role: 'frontend'

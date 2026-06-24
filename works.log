@@ -74,3 +74,13 @@
 [2026-06-24] @gemini | 모니터링 자체 Node Exporter 수집 문제(host.docker.internal 미해결) 해결
   - 변경 파일: docker-compose.yml
   - 세부 내용: 리눅스 환경의 Docker 컨테이너 내부에서 host.docker.internal을 해석할 수 있도록 prometheus 서비스에 extra_hosts(host.docker.internal:host-gateway) 설정을 추가함.
+
+[2026-06-24] @gemini | ASG+ALB 동적 모니터링 인프라 구성 (EC2 Service Discovery + CloudWatch Exporter)
+  - 변경 파일: prometheus/prometheus.yml, docker-compose.yml, cloudwatch/yace-config.yml(신규), terraform/iam.tf(신규), terraform/ec2_monitoring.tf, terraform/main.tf
+  - 세부 내용:
+    1) prometheus.yml: 정적 IP 기반 스크랩을 EC2 Service Discovery(ec2_sd_configs)로 전환. Project/Role/Color 태그 기반 relabel_configs로 ASG 인스턴스 자동 탐색 및 Blue/Green 배포 구분 지원. CloudWatch Exporter(yace:5000) 스크랩 타겟 추가. 기존 정적 백엔드 타겟은 폴백으로 유지.
+    2) docker-compose.yml: YACE(yet-another-cloudwatch-exporter:v0.61.2) 컨테이너 추가. ALB/ASG/EC2 CloudWatch 메트릭을 Prometheus로 중계.
+    3) cloudwatch/yace-config.yml: ALB(RequestCount, TargetResponseTime, 5xx 에러 등), ASG(인스턴스 수, 희망 용량), EC2(CPUUtilization, Network I/O) 메트릭 수집 설정.
+    4) terraform/iam.tf: 모니터링 EC2용 IAM Role 신규 생성. ec2:DescribeInstances(Service Discovery), cloudwatch:ListMetrics/GetMetricData(YACE), tag:GetResources 권한 포함.
+    5) terraform/ec2_monitoring.tf: 모니터링 EC2 인스턴스에 iam_instance_profile 연결.
+

@@ -7,6 +7,7 @@
 #   - variables.tf       : 입력 변수 정의
 #   - vpc.tf             : VPC, 서브넷, IGW
 #   - security_groups.tf : 보안 그룹 규칙
+#   - iam.tf             : IAM Role/Policy (EC2 Discovery, CloudWatch 조회)
 #   - ec2_monitoring.tf  : 모니터링 EC2 인스턴스
 #   - outputs.tf         : 출력 값
 

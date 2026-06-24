@@ -55,6 +55,7 @@ resource "aws_instance" "monitoring" {
   key_name               = var.key_pair_name != "" ? var.key_pair_name : aws_key_pair.monitoring[0].key_name
   subnet_id              = aws_subnet.public[0].id
   vpc_security_group_ids = [aws_security_group.monitoring.id]
+  iam_instance_profile   = aws_iam_instance_profile.monitoring.name
 
   # 루트 볼륨
   root_block_device {
