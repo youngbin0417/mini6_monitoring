@@ -1,0 +1,23 @@
+name: Deploy Monitoring
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to monitoring EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/aivle05_monitoring
+            git pull origin main
+            chmod +x ./scripts/deploy.sh
+            ./scripts/deploy.sh --reload
