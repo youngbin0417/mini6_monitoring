@@ -19,4 +19,5 @@ jobs:
           script: |
             cd /home/ec2-user/aivle05_monitoring
             git pull origin main
+            chmod +x ./scripts/deploy.sh
             ./scripts/deploy.sh --reload
