@@ -57,10 +57,10 @@ scrape_configs:
   #       labels:
   #         role: 'frontend'
   #
-  # # 2) 백엔드 서비스 (aivle05-book-backend)
-  # - job_name: 'aivle05-book-backend'
-  #   static_configs:
-  #     - targets:
-  #         - '<백엔드-인스턴스-IP>:9100'
-  #       labels:
-  #         role: 'backend'
+  # 1) 백엔드 서비스 (aivle05-book-backend)
+  - job_name: 'aivle05-book-backend'
+    static_configs:
+      - targets:
+          - '172.31.21.34:9100'
+        labels:
+          role: 'backend'

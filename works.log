@@ -66,3 +66,11 @@
 [2026-06-23] @youngbin0417 + @gemini | 백엔드 서비스 모니터링 타겟 연동 및 보안 그룹 설정
   - 변경 파일: prometheus/prometheus.yml, terraform/terraform.tfvars
   - 세부 내용: 백엔드 인스턴스 `aivle05-book-backend` (사설 IP `172.31.21.34`)의 메트릭 수집을 위해 Prometheus 설정을 반영하고, 로컬 및 외부 에이전트로부터 로그를 받기 위해 `service_instance_cidrs`에 `172.31.0.0/16` 및 `0.0.0.0/0`을 추가함.
+
+[2026-06-24] @gemini | 백엔드 Node Exporter 스크랩 주석 해제 및 실제 사설 IP 설정
+  - 변경 파일: prometheus/prometheus.yml
+  - 세부 내용: 백엔드 인스턴스 `aivle05-book-backend` (사설 IP `172.31.21.34`)의 메트릭 수집을 활성화하기 위해 `prometheus.yml`에서 해당 타겟의 주석을 해제하고 실제 사설 IP를 등록함.
+
+[2026-06-24] @gemini | 모니터링 자체 Node Exporter 수집 문제(host.docker.internal 미해결) 해결
+  - 변경 파일: docker-compose.yml
+  - 세부 내용: 리눅스 환경의 Docker 컨테이너 내부에서 host.docker.internal을 해석할 수 있도록 prometheus 서비스에 extra_hosts(host.docker.internal:host-gateway) 설정을 추가함.
