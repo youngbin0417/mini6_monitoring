@@ -189,7 +189,7 @@ EOF
 
     sudo systemctl daemon-reload
     sudo systemctl enable promtail
-    sudo systemctl start promtail
+    sudo systemctl restart promtail  # start → restart: 이미 실행 중이어도 새 config 반드시 로드
 
     success "Promtail 설치 완료 (→ ${MONITORING_IP}:3100)"
 }
