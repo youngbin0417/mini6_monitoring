@@ -84,3 +84,10 @@
     4) terraform/iam.tf: 모니터링 EC2용 IAM Role 신규 생성. ec2:DescribeInstances(Service Discovery), cloudwatch:ListMetrics/GetMetricData(YACE), tag:GetResources 권한 포함.
     5) terraform/ec2_monitoring.tf: 모니터링 EC2 인스턴스에 iam_instance_profile 연결.
 
+[2026-06-25] @gemini | install-agents.sh Promtail hostname 하드코딩 버그 수정
+  - 변경 파일: scripts/install-agents.sh
+  - 세부 내용: Promtail config 생성 시 $HOSTNAME(스크립트 실행 시점 고정값) 대신
+    CURRENT_HOSTNAME=$(hostname -f)(실행 시 동적 조회)를 사용하도록 수정.
+    이미 설치된 경우 바이너리 재설치는 건너뛰되 config 파일은 항상 현재 hostname으로
+    재생성하도록 변경. ASG 인스턴스 교체 시 Loki 라벨이 이전 인스턴스 hostname으로
+    남는 문제 근본 원인 수정.

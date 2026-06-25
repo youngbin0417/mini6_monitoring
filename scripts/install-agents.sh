@@ -98,23 +98,26 @@ install_promtail() {
     log "Promtail v${PROMTAIL_VERSION} 설치 중..."
 
     if command -v promtail &> /dev/null; then
-        warn "Promtail이 이미 설치되어 있습니다."
-        return
+        warn "Promtail 바이너리가 이미 설치되어 있습니다. 설정 파일만 재생성합니다."
+    else
+
+        cd /tmp
+        wget -q "https://github.com/grafana/loki/releases/download/v${PROMTAIL_VERSION}/promtail-linux-amd64.zip"
+        unzip -o promtail-linux-amd64.zip
+        sudo mv promtail-linux-amd64 /usr/local/bin/promtail
+        rm -f promtail-linux-amd64.zip
     fi
 
-    cd /tmp
-    wget -q "https://github.com/grafana/loki/releases/download/v${PROMTAIL_VERSION}/promtail-linux-amd64.zip"
-    unzip -o promtail-linux-amd64.zip
-    sudo mv promtail-linux-amd64 /usr/local/bin/promtail
-    rm -f promtail-linux-amd64.zip
+    # 현재 인스턴스의 hostname을 동적으로 읽어 config 생성 (ASG 인스턴스 교체 대응)
+    CURRENT_HOSTNAME=$(hostname -f)
 
     # 설정 파일 디렉토리 생성
     sudo mkdir -p /etc/promtail
 
-    # Promtail 설정 파일 생성
+    # Promtail 설정 파일 생성 (현재 hostname 동적 반영)
     sudo tee /etc/promtail/config.yml > /dev/null <<EOF
 # ============================================================
-# Promtail 설정 - ${HOSTNAME}
+# Promtail 설정 - ${CURRENT_HOSTNAME}
 # 모니터링 서버: ${MONITORING_IP}
 # ============================================================
 server:
@@ -138,7 +141,7 @@ scrape_configs:
           - localhost
         labels:
           job: system
-          host: ${HOSTNAME}
+          host: ${CURRENT_HOSTNAME}
           __path__: /var/log/*.log
 
   # ---- systemd journal 로그 ----
@@ -147,7 +150,7 @@ scrape_configs:
       max_age: 12h
       labels:
         job: journal
-        host: ${HOSTNAME}
+        host: ${CURRENT_HOSTNAME}
     relabel_configs:
       - source_labels: ['__journal__systemd_unit']
         target_label: 'unit'
@@ -159,7 +162,7 @@ scrape_configs:
   #         - localhost
   #       labels:
   #         job: application
-  #         host: ${HOSTNAME}
+  #         host: ${CURRENT_HOSTNAME}
   #         __path__: /var/log/application/*.log
 EOF
 
