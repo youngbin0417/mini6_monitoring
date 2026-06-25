@@ -155,15 +155,25 @@ scrape_configs:
       - source_labels: ['__journal__systemd_unit']
         target_label: 'unit'
 
-  # ---- 애플리케이션 로그 (추후 경로 수정) ----
-  # - job_name: application
-  #   static_configs:
-  #     - targets:
-  #         - localhost
-  #       labels:
-  #         job: application
-  #         host: ${CURRENT_HOSTNAME}
-  #         __path__: /var/log/application/*.log
+  # ---- 애플리케이션 로그 (Spring Boot) ----
+  - job_name: application
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: application
+          host: ${CURRENT_HOSTNAME}
+          __path__: /home/ec2-user/app/**/*.log
+
+  # ---- 애플리케이션 콘솔 로그 (nohup) ----
+  - job_name: application_console
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: application
+          host: ${CURRENT_HOSTNAME}
+          __path__: /home/ec2-user/app/**/nohup.out
 EOF
 
     # positions 디렉토리 생성

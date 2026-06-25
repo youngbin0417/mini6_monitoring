@@ -67,15 +67,15 @@
   - 변경 파일: prometheus/prometheus.yml, terraform/terraform.tfvars
   - 세부 내용: 백엔드 인스턴스 `aivle05-book-backend` (사설 IP `172.31.21.34`)의 메트릭 수집을 위해 Prometheus 설정을 반영하고, 로컬 및 외부 에이전트로부터 로그를 받기 위해 `service_instance_cidrs`에 `172.31.0.0/16` 및 `0.0.0.0/0`을 추가함.
 
-[2026-06-24] @gemini | 백엔드 Node Exporter 스크랩 주석 해제 및 실제 사설 IP 설정
+[2026-06-24] @youngbin0417 + @gemini | 백엔드 Node Exporter 스크랩 주석 해제 및 실제 사설 IP 설정
   - 변경 파일: prometheus/prometheus.yml
   - 세부 내용: 백엔드 인스턴스 `aivle05-book-backend` (사설 IP `172.31.21.34`)의 메트릭 수집을 활성화하기 위해 `prometheus.yml`에서 해당 타겟의 주석을 해제하고 실제 사설 IP를 등록함.
 
-[2026-06-24] @gemini | 모니터링 자체 Node Exporter 수집 문제(host.docker.internal 미해결) 해결
+[2026-06-24] @youngbin0417 + @gemini | 모니터링 자체 Node Exporter 수집 문제(host.docker.internal 미해결) 해결
   - 변경 파일: docker-compose.yml
   - 세부 내용: 리눅스 환경의 Docker 컨테이너 내부에서 host.docker.internal을 해석할 수 있도록 prometheus 서비스에 extra_hosts(host.docker.internal:host-gateway) 설정을 추가함.
 
-[2026-06-24] @gemini | ASG+ALB 동적 모니터링 인프라 구성 (EC2 Service Discovery + CloudWatch Exporter)
+[2026-06-24] @youngbin0417 + @gemini | ASG+ALB 동적 모니터링 인프라 구성 (EC2 Service Discovery + CloudWatch Exporter)
   - 변경 파일: prometheus/prometheus.yml, docker-compose.yml, cloudwatch/yace-config.yml(신규), terraform/iam.tf(신규), terraform/ec2_monitoring.tf, terraform/main.tf
   - 세부 내용:
     1) prometheus.yml: 정적 IP 기반 스크랩을 EC2 Service Discovery(ec2_sd_configs)로 전환. Project/Role/Color 태그 기반 relabel_configs로 ASG 인스턴스 자동 탐색 및 Blue/Green 배포 구분 지원. CloudWatch Exporter(yace:5000) 스크랩 타겟 추가. 기존 정적 백엔드 타겟은 폴백으로 유지.
@@ -84,10 +84,18 @@
     4) terraform/iam.tf: 모니터링 EC2용 IAM Role 신규 생성. ec2:DescribeInstances(Service Discovery), cloudwatch:ListMetrics/GetMetricData(YACE), tag:GetResources 권한 포함.
     5) terraform/ec2_monitoring.tf: 모니터링 EC2 인스턴스에 iam_instance_profile 연결.
 
-[2026-06-25] @gemini | install-agents.sh Promtail hostname 하드코딩 버그 수정
+[2026-06-25] @youngbin0417 + @gemini | install-agents.sh Promtail hostname 하드코딩 버그 수정
   - 변경 파일: scripts/install-agents.sh
   - 세부 내용: Promtail config 생성 시 $HOSTNAME(스크립트 실행 시점 고정값) 대신
     CURRENT_HOSTNAME=$(hostname -f)(실행 시 동적 조회)를 사용하도록 수정.
     이미 설치된 경우 바이너리 재설치는 건너뛰되 config 파일은 항상 현재 hostname으로
     재생성하도록 변경. ASG 인스턴스 교체 시 Loki 라벨이 이전 인스턴스 hostname으로
     남는 문제 근본 원인 수정.
+
+[2026-06-25] @youngbin0417 + @gemini | ASG+Promtail 트러블슈팅 가이드 보강 및 GitHub Actions 검토
+  - 변경 파일: docs/troubleshooting.md, works.log
+  - 세부 내용: ASG 환경에서 발생한 Promtail 재시작 누락 문제, hostname 하드코딩 오류, EC2 SD 권한 오류에 대한 원인 및 해결 방법을 가이드에 추가함. GitHub Actions 자동 배포 워크플로우에 대한 분석 및 검토를 완료함.
+
+[2026-06-25] @gemini | install-agents.sh Promtail 애플리케이션 로그 경로 버그 수정
+  - 변경 파일: scripts/install-agents.sh, works.log
+  - 세부 내용: Promtail이 수집하는 스프링 부트 애플리케이션의 실제 경로가 `/home/ec2-user/app/` 하위(예: step1/ 등)인 것을 감안하여, 기본 주석 상태였던 애플리케이션 로그 스크랩 설정을 활성화하고 경로를 재귀 검색 패턴인 `/home/ec2-user/app/**/*.log` 및 `/home/ec2-user/app/**/nohup.out`으로 유연하게 수정함.

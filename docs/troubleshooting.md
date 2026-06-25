@@ -152,3 +152,141 @@ terraform force-unlock <LOCK_ID>
 # user_data 변경으로 인한 재생성은 lifecycle.ignore_changes로 방지됨
 # 수동으로 인스턴스에 접속하여 변경 적용
 ```
+
+---
+
+## ASG + Promtail 실전 트러블슈팅
+
+> ASG(Auto Scaling Group) 환경에서 에이전트를 운영하며 실제 발생한 문제들을 기록합니다.
+
+### Promtail이 실행 중인데 Loki에 로그가 안 들어옴
+
+**원인 A — config 재생성 후 재시작을 안 함**
+
+`systemctl start`는 이미 실행 중인 서비스에 아무것도 하지 않습니다. config를 바꿔도 메모리에는 이전 config가 그대로입니다.
+
+```bash
+sudo systemctl restart promtail    # start 대신 항상 restart
+journalctl -u promtail -n 10 --no-pager
+```
+
+**원인 B — Loki URL 잘못 설정**
+
+```bash
+cat /etc/promtail/config.yml | grep url
+# 정상: url: http://<모니터링-사설IP>:3100/loki/api/v1/push
+```
+
+**원인 C — 보안 그룹 3100 포트 미개방**
+
+```bash
+journalctl -u promtail -n 20 --no-pager
+# "context deadline exceeded" → TCP 연결 불가 = 보안 그룹 문제
+# "connection refused" → Loki 컨테이너가 안 뜬 상태
+```
+
+해결: 모니터링 서버 보안 그룹에 인바운드 TCP 3100, 소스: 서비스 VPC CIDR 추가
+
+---
+
+### 모든 ASG 인스턴스가 Grafana에서 같은 hostname으로 보임
+
+**원인**
+
+`install-agents.sh`가 Promtail config 생성 시 hostname을 **설치 시점에 하드코딩**합니다.
+동일 AMI로 만든 인스턴스는 원본 인스턴스의 hostname이 config에 그대로 남습니다.
+
+```yaml
+# 잘못된 예 — AMI 굽기 당시 hostname이 박혀 있음
+host: ip-172-31-21-34.ec2.internal   # 실제 이 인스턴스는 172-31-40-133인데!
+```
+
+**즉시 해결**
+
+```bash
+# 현재 hostname 확인
+hostname -f
+
+# config 교체 후 재시작
+sudo sed -i 's/<기존-hostname>/<현재-hostname>/g' /etc/promtail/config.yml
+sudo systemctl restart promtail
+```
+
+**근본 해결 (스크립트 수정)**
+
+`install-agents.sh`에서 hostname을 고정 변수가 아닌 실행 시 동적 조회로 변경하고,
+이미 설치된 경우에도 config를 항상 재생성하도록 수정합니다:
+
+```bash
+# 수정 전
+HOSTNAME=$(hostname)
+
+# 수정 후: 설치 시 동적 조회
+CURRENT_HOSTNAME=$(hostname -f)
+```
+
+---
+
+### 기존 실행 중인 ASG 인스턴스에 에이전트가 없음
+
+**원인**
+
+Launch Template User Data는 인스턴스 **최초 생성 시에만** 실행됩니다.
+이미 뜬 인스턴스에는 소급 적용되지 않습니다.
+
+**해결 — 각 인스턴스에 수동 실행**
+
+```bash
+curl -O https://raw.githubusercontent.com/youngbin0417/mini6_monitoring/deploy/scripts/install-agents.sh
+chmod +x install-agents.sh
+./install-agents.sh <모니터링-서버-사설IP>
+```
+
+스크립트가 설치 여부를 감지하여 바이너리는 건너뛰고 config만 재생성 후 재시작합니다.
+
+**앞으로 자동화:** ASG Launch Template User Data에 스크립트를 추가하면
+신규 인스턴스가 생성될 때 자동으로 에이전트가 설치됩니다.
+
+---
+
+### Prometheus EC2 Service Discovery 미감지
+
+**체크리스트**
+
+1. **EC2 태그 확인** — `Project=aivle05` 태그가 없으면 수집 대상 제외됨
+
+   | Key | Value |
+   |:----|:------|
+   | Project | aivle05 |
+   | Role | backend |
+   | Color | blue 또는 green |
+
+2. **IAM Role 확인** — `ec2:DescribeInstances` 권한 없으면 인스턴스 목록 조회 불가
+
+   ```bash
+   curl -s http://169.254.169.254/latest/meta-data/iam/info
+   # "Code": "Success" → IAM Role 정상 연결
+   ```
+
+   해결: AWS 콘솔 → EC2 → 인스턴스 선택 → 작업 → 보안 → IAM 역할 수정
+   필요 정책: `AmazonEC2ReadOnlyAccess`, `CloudWatchReadOnlyAccess`
+
+3. **보안 그룹 9100 포트** — 서비스 인스턴스 보안 그룹에 TCP 9100, 소스: 모니터링 VPC CIDR
+
+---
+
+### 빠른 진단 체크리스트
+
+```bash
+# 모니터링 서버에서
+docker compose ps                           # 모든 컨테이너 Up 확인
+curl -s http://localhost:9090/-/healthy     # Prometheus 헬스
+curl -s http://localhost:3100/ready         # Loki 헬스
+docker compose logs yace --tail=10         # CloudWatch Exporter 에러 여부
+
+# 서비스 인스턴스에서
+systemctl is-active node_exporter           # Node Exporter 실행 여부
+systemctl is-active promtail                # Promtail 실행 여부
+curl -s http://localhost:9100/metrics | head -3   # Node Exporter 메트릭
+journalctl -u promtail -n 10 --no-pager    # Promtail 에러 로그
+```
